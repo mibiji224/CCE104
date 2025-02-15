@@ -7,7 +7,7 @@ if ($conn->connect_error) {
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $username = $_POST['username'];
+    $username = htmlspecialchars($_POST['username']);
     $password = $_POST['password'];
 
     $sql = "SELECT * FROM users WHERE username=?";
@@ -22,18 +22,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $_SESSION['user_id'] = $row['id'];
             $_SESSION['username'] = $row['username'];
             $_SESSION['role'] = $row['role'];
-            
+
+            $stmt->close();
+            $conn->close();
+
             if ($row['role'] == 'admin') {
                 header("Location: dashboard.php");
             } else {
                 header("Location: landing.php");
             }
             exit();
-        } else {
-            echo "Invalid credentials.";
         }
-    } else {
-        echo "User not found.";
     }
+
+    $_SESSION['error'] = "Invalid username or password.";
+    $stmt->close();
+    $conn->close();
+    header("Location: index.php");
+    exit();
 }
 ?>
